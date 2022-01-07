@@ -1,0 +1,45 @@
+#그래디언트 부스팅 패키지 불러오기
+#install.packages("gbm")
+library(gbm)
+#트레인셋 테스트셋 나누는거 패키지 불러오기
+library(caret)
+
+set.seed(123)
+trainindex<-createDataPartition(y=iris$Species, p=0.8, list=F)
+train<-iris[trainindex,]
+test<-iris[-trainindex,]
+
+
+gra<-gbm(Species~., distribution="multinomial", n.trees=1000, verbose=T, interaction.depth=5,
+shrinkage=0.001, data=train)
+#bernoulli는 분류분석을 위한 옵션 (타겟변수를 팩터로 인식해주기 위해서)
+#verbose=T는 의사결정나무 생성과정 출력하라는 의미
+#interaction.depth는 트리의 깊이 조정
+#shrinkage는 학습률로써 값이 작으면 오래 학습, 값이 크면 빠른 학습
+
+#해당 데이터는 부스팅 수행해도 정확도가 크게 높아지지는 않는다.
+#이는 주로 모수 부족 및 하나의 나무를 생성하는 것만으로도 충분히 정확도 있는 나무가 생성될 정도로 깔끔한 데이터의 경우 발생
+
+#몇 개의 나무를 생성하는 게 적절한지 파악하는 코드
+gbm.perf(gra)
+
+#변수별 상대 중요도 출력
+a<-summary(gra)
+gra
+
+#모델 정확도 검정
+#test셋에 적용시키는것 
+#n.trees는 내가 학습시킨 그래디언트 부스팅 모델에서 나무수 몇개일 때의 모델을 사용할 지 결정
+#예를 들어 내가 500개까지 학습시킨 모델이라면 500개 넘어가는 숫자는 넣을 수 없음
+exact_model<-predict(gra,newdata=test,n.trees=1000, type="response")
+
+#0.8이상의 값이면 True 아니면 False 반환하게 해줌
+expect<-ifelse(exact_model>0.8,"True","False")
+expect
+
+#실제 값과의 비교
+df_expect<-as.data.frame(expect)
+df_expect[,4]<-test$Species
+df_expect
+
+#4개 데이터 정도 빼고 잘 예측한 것을 볼 수 있다.

@@ -1,0 +1,81 @@
+
+
+###데이터 설정
+
+data<-house[,18:27]
+
+
+###train test set 나누기 (이걸 해야한다고 나와서 일단 해봄)
+#install.packages("caret")
+library(caret)
+set.seed(1234)
+
+inTrain <- createDataPartition(y = data, p = 0.7, list = F)  ##train 70 / test 30
+training <- data[inTrain,]
+testing <- data[-inTrain,]
+training
+
+
+
+####군집 중심의 개 수 결정하는 방법
+
+#install.packages("NbClust")
+
+library(NbClust)
+
+nc<-NbClust(data, min.nc = 2, max.nc=15, method="kmeans")##해석좀,,,이거 개오래 걸리니까 조심(함부로 돌리면 20분은 걸림..;
+
+
+barplot(table(nc$Best.n[1,]))  ##2로 돌리라고? (이거 진짜 진짜 오래 걸리니까 한 명만 돌려라)
+
+
+
+###모델작성 (원래 그 전에 표준화가 필효하지만 현재 데이터는 개 수로 모두 단위가 같음)
+
+house.kmeans <- kmeans(training, centers=6)##안돼,,,
+
+house.kmeans$cluster <- as.factor(house.kmeans$cluster)
+house.kmeans$centers
+
+
+###잘 분류됐는지 확인하기
+
+library(ggplot2)
+
+house.kmeans$cluster <- as.factor(house.kmeans$cluster)
+house.kmeans$centers
+qplot(N_SchoolNearBy.High., N_SchoolNearBy.University., colour=house.kmeans$cluster, data = training)
+ 
+
+####이걸 보면 대충 분류가 됐다는걸 알텐데,,,,
+
+
+
+
+
+####용헌오빠 코드
+
+library(cluster)
+
+set.seed(1234)
+
+
+cluster1 <- kmeans(house[,18:27], centers = 8)
+cluster1
+head(house)
+
+clust_group1 <- cluster1$cluster
+aggregate(clust_group1 ~ house$SubwayStation, FUN = unique)
+
+
+cluster1$centers
+
+
+
+
+###잘 분류됐는지 확인하기
+library(ggplot2)
+cluster1$cluster <- as.factor(cluster1$cluster)
+qplot(N_SchoolNearBy.High., N_SchoolNearBy.University.,colour=cluster1$cluster,data =data)  ##나름 잘 된거 같은데,..? 이걸 얘기해 보자.
+ 
+

@@ -1,0 +1,27 @@
+
+# Ggplot2 -----------------------------------------------------------------
+
+#install.packages("ggfortify")
+library(ggfortify)
+
+
+##model 1
+
+md1<-autoplot(model1)+theme_bw()
+md1
+
+
+##model 2
+
+md2<-autoplot(model2)+theme_bw()
+md2
+
+
+##model 3
+md3<-autoplot(model3)+theme_bw()
+md3
+
+
+##model 4
+md4<-autoplot(model4)+theme_bw()
+md4
